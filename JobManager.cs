@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace JobApplicationTracker;
 
@@ -49,6 +50,41 @@ public class JobManager
         Applications.RemoveAt(number - 1);
         return true;
     }
+
+
+    // LINQ Where: bara lappar med vald status
+    public void ShowByStatus(Status status)
+    {
+        List<JobApplication> matches = Applications
+            .Where(a => a.Status == status)
+            .ToList();
+
+        PrintList($"Ansökningar med status {status}", matches);
+    }
+
+    // LINQ OrderBy: sorterar efter datum, äldst först
+    public void ShowSortedByDate()
+    {
+        List<JobApplication> sorted = Applications
+            .OrderBy(a => a.ApplicationDate)
+            .ToList();
+
+        PrintList("Sorterat efter datum (äldst först)", sorted);
+    }
+
+    // Extra filter: utan svar och äldre än 14 dagar
+    public void ShowWaitingOverTwoWeeks()
+    {
+        List<JobApplication> waiting = Applications
+            .Where(a => a.ResponseDate == null && a.GetDaysSinceApplied() > 14)
+            .OrderByDescending(a => a.GetDaysSinceApplied())
+            .ToList();
+
+        PrintList("Utan svar i mer än 14 dagar", waiting);
+    }
+
+
+
 
     // Visar alla ansökningar
     public void ShowAll()
