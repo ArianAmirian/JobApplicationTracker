@@ -72,6 +72,8 @@ public class JobManager
         PrintList("Sorterat efter datum (äldst först)", sorted);
     }
 
+
+
     // Extra filter: utan svar och äldre än 14 dagar
     public void ShowWaitingOverTwoWeeks()
     {
@@ -80,10 +82,57 @@ public class JobManager
             .OrderByDescending(a => a.GetDaysSinceApplied())
             .ToList();
 
+
         PrintList("Utan svar i mer än 14 dagar", waiting);
     }
 
 
+    // Statistik med LINQ: Count, Where, Average, OrderByDescending
+    public void ShowStatistics()
+    {
+        Console.WriteLine("=== Statistik ===");
+
+        // Skydd: Average kraschar på en tom lista
+        if (Applications.Count == 0)
+        {
+            Console.WriteLine("Inga ansökningar ännu, så det finns ingen statistik att visa.");
+            return;
+        }
+
+        // Totalt antal
+        Console.WriteLine($"Totalt antal ansökningar: {Applications.Count}");
+
+        // Antal per status: Count med villkor
+        Console.WriteLine("Antal per status:");
+        foreach (Status s in Enum.GetValues<Status>())
+        {
+            int count = Applications.Count(a => a.Status == s);
+            Console.ForegroundColor = GetColor(s);
+            Console.WriteLine($"  {s}: {count}");
+            Console.ResetColor();
+        }
+
+        // Genomsnittlig svarstid: först Where, sedan Average
+        List<JobApplication> answered = Applications
+            .Where(a => a.ResponseDate != null)
+            .ToList();
+
+        if (answered.Count > 0)
+        {
+            double averageDays = answered.Average(a => (a.ResponseDate!.Value - a.ApplicationDate).TotalDays);
+            Console.WriteLine($"Genomsnittlig svarstid: {averageDays:F1} dagar");
+        }
+        else
+        {
+            Console.WriteLine("Genomsnittlig svarstid: inga svar ännu");
+        }
+
+        // Extra: snittlön och högsta önskade lön
+        double averageSalary = Applications.Average(a => a.SalaryExpectation);
+        JobApplication highest = Applications.OrderByDescending(a => a.SalaryExpectation).First();
+        Console.WriteLine($"Genomsnittlig önskad lön: {averageSalary:N0} kr");
+        Console.WriteLine($"Högsta önskade lön: {highest.SalaryExpectation:N0} kr ({highest.CompanyName})");
+    }
 
 
     // Visar alla ansökningar
