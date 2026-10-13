@@ -218,30 +218,3 @@ public class Program
         Console.ResetColor();
     }
 }
-
-namespace JobApplicationTracker;
-
-public static class JobManagerExtensions
-{
-    public static void ShowByStatus(this JobManager manager, Status status)
-    {
-        bool found = false;
-
-        foreach (JobApplication application in manager.Applications)
-        {
-            if (application.Status != status)
-                continue;
-
-            if (!found)
-            {
-                Console.WriteLine($"--- Ansökningar med status: {status} ---");
-                found = true;
-            }
-
-            Console.WriteLine(application);
-        }
-
-        if (!found)
-            Console.WriteLine($"Det finns inga ansökningar med status {status}.");
-    }
-}
